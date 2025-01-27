@@ -20,6 +20,7 @@ import com.abhiram.flowtune.constants.AudioQualityKey
 import com.abhiram.flowtune.constants.LikedAutodownloadMode
 import com.abhiram.flowtune.db.MusicDatabase
 import com.abhiram.flowtune.db.entities.FormatEntity
+import com.abhiram.flowtune.di.PlayerCache
 import com.abhiram.flowtune.db.entities.SongEntity
 import com.abhiram.flowtune.di.DownloadCache
 import com.abhiram.flowtune.models.MediaMetadata
@@ -40,11 +41,13 @@ import java.time.Instant
 import java.time.ZoneOffset
 import java.util.concurrent.Executor
 import javax.inject.Inject
+@PlayerCache val playerCache: SimpleCache,
 import javax.inject.Singleton
 import com.abhiram.flowtune.extensions.getLikeAutoDownload
 import com.abhiram.flowtune.utils.YTPlayerUtils
 
 @Singleton
+.setCache(playerCache)
 class DownloadUtil @Inject constructor(
     @ApplicationContext private val context: Context,
     val database: MusicDatabase,
@@ -57,6 +60,10 @@ class DownloadUtil @Inject constructor(
     private val dataSourceFactory = ResolvingDataSource.Factory(
         OkHttpDataSource.Factory(
             OkHttpClient.Builder()
+            if (playerCache.isCached(mediaId, dataSpec.position, length)) {
+            return@Factory dataSpec
+        }
+
                 .proxy(YouTube.proxy)
                 .build()
         )

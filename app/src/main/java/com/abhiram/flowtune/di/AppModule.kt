@@ -3,10 +3,14 @@ package com.abhiram.flowtune.di
 import android.content.Context
 import androidx.media3.database.DatabaseProvider
 import androidx.media3.database.StandaloneDatabaseProvider
+import androidx.media3.datasource.cache.LeastRecentlyUsedCacheEvictor
 import androidx.media3.datasource.cache.NoOpCacheEvictor
 import androidx.media3.datasource.cache.SimpleCache
+import com.abhiram.flowtune.constants.MaxSongCacheSizeKey
 import com.abhiram.flowtune.db.InternalDatabase
 import com.abhiram.flowtune.db.MusicDatabase
+import com.abhiram.flowtune.utils.dataStore
+import com.abhiram.flowtune.utils.get
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -15,6 +19,9 @@ import dagger.hilt.components.SingletonComponent
 import javax.inject.Qualifier
 import javax.inject.Singleton
 
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class PlayerCache
 
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
@@ -33,6 +40,24 @@ object AppModule {
     fun provideDatabaseProvider(@ApplicationContext context: Context): DatabaseProvider =
         StandaloneDatabaseProvider(context)
 
+   @Singleton
+    @Provides
+    @PlayerCache
+    fun providePlayerCache(@ApplicationContext context: Context, databaseProvider: DatabaseProvider): SimpleCache {
+        val constructor = {
+            SimpleCache(
+                context.filesDir.resolve("exoplayer"),
+                when (val cacheSize = context.dataStore[MaxSongCacheSizeKey] ?: 1024) {
+                    -1 -> NoOpCacheEvictor()
+                    else -> LeastRecentlyUsedCacheEvictor(cacheSize * 1024 * 1024L)
+                },
+                databaseProvider
+            )
+        }
+        constructor().release()
+        return constructor()
+    }
+    
     @Singleton
     @Provides
     @DownloadCache

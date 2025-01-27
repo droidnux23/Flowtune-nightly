@@ -33,8 +33,7 @@ val ContentCountryKey = stringPreferencesKey("contentCountry")
 val ProxyEnabledKey = booleanPreferencesKey("proxyEnabled")
 val ProxyUrlKey = stringPreferencesKey("proxyUrl")
 val ProxyTypeKey = stringPreferencesKey("proxyType")
-
-
+val MaxSongCacheSizeKey = intPreferencesKey("maxSongCacheSize")
 /**
  * Player & audio
  */
