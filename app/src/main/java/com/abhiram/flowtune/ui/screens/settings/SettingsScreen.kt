@@ -78,11 +78,6 @@ fun SettingsScreen(
             onClick = { navController.navigate("settings/backup_restore") }
         )
         PreferenceEntry(
-            title = { Text(stringResource(R.string.experimental_settings_title)) },
-            icon = { Icon(Icons.Rounded.WarningAmber, null) },
-            onClick = { navController.navigate("settings/experimental") }
-        )
-        PreferenceEntry(
             title = { Text(stringResource(R.string.about)) },
             icon = { Icon(Icons.Rounded.Info, null) },
             onClick = { navController.navigate("settings/about") }
